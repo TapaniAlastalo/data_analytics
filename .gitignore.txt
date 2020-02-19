@@ -1,2 +1,7 @@
 .pynb_checkpoints
 testi
+/tehtävät/.vs
+.vscode
+.vs
+Debug
+Build
