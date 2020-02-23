@@ -13,9 +13,9 @@ dfSaa['Klo'] = (dfSaa['Klo'].str.split(':').str.get(0)).astype(int)
 print("---")
 
 #dfYhd = pd.concat([dfPyorat, dfSaa], axis=1)
-tulostettavat = ['Kk', 'Pv', 'Klo']
-#print(dfYhd[tulostettavat])
+yhdistettävät = ['Kk', 'Pv', 'Klo']
+#print(dfYhd[yhdistettävät])
 print("combine")
-dfYhd2 = dfPyorat.combine_first(dfSaa)
-print(dfYhd2[tulostettavat])
+dfYhd2 = pd.merge(dfPyorat, dfSaa, on = yhdistettävät) #dfPyorat.combine_first(dfSaa)
+print(dfYhd2[yhdistettävät].sort_values(['Kk', 'Pv', 'Klo'], ascending=False).head(50))
 print(dfYhd2)
