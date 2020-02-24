@@ -8,7 +8,17 @@ print('\nlukumäärät siten, että riveillä perhesuhteet, sarakkeissa tyytyvä
 print(pd.crosstab(df['perhetilanne'],  df['TyytJohto']))
 
 print('\nprosenttiosuudet siten, että riveillä koulutus tekstinä (esim peruskoulu), sarakkeissa tyytyväisyys työtehtäviin ( prosenttiosuudet 1 desimaalilla riveittäin eli esim montako % vain peruskoulun käyneistä vastaa 1 jne.)')
-print(pd.crosstab(df['koulutus'],  df['TyytTyöteht'], normalize = 'index').applymap("{:.1%}".format).stack())
+
+def koulutus(x):
+    if x['koulutus'] < 1: return 'Ei Tiedossa'
+    elif x['koulutus'] < 2: return 'Peruskoulu'
+    elif x['koulutus'] < 3: return 'Toinen Aste'
+    elif x['koulutus'] < 4: return 'Alempi Korkeakoulu'
+    elif x['koulutus'] < 5: return 'Ylempi Korkeakoulu'
+    else: 'Ei Tiedossa'
+
+df['koulutukset'] = df.apply(koulutus, axis=1)
+print(pd.crosstab(df['koulutukset'],  df['TyytTyöteht'], normalize = 'index').applymap("{:.1%}".format).stack())
 
 print('\nkeskiarvot tyytyväisyyksistä johtoon ja työtehtäviin siten, että riveillä on ikäluokka 20-29, 30-39, ... 60-69 ja (eri sarakkeissa) tyytyväisyydet johtoon ja työtehtäviin')
 df2 = df
