@@ -22,3 +22,17 @@ df4 = pd.concat([df2, df3], axis=1)
 #print(df4.iloc[:,20:30])
 #print(df4.unstack())
 #print(df4.stack())
+
+df5 = df.groupby(['date','hour'])['value'].std() / df.groupby(['date','hour'])['value'].mean()
+df5.fillna(0, inplace=True)
+print(df5.unstack())
+
+print(df5.count())
+
+#df5.plot.density()  # tässä luokat määritellään automaattisesti
+
+#sns.pairplot(data = df, vars = ['suunta', 'tunti', 'nopeus'], hue = 'ajoneuvoluokka', diag_kind = 'kde', height = 4)
+sns.distplot(df5, hist = False, kde = True,
+                 kde_kws = {'shade': True, 'linewidth': 3}, 
+                  label = "reino")
+plt.show()
