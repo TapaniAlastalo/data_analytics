@@ -1,38 +1,35 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 df = pd.read_csv('https://student.labranet.jamk.fi/~varpe/datananal2k2020/kerta5/kone5.csv', sep = ',', decimal='.')
 
 df['hour'] = df['time'].astype(str).str.split(':').str.get(0)
-print(df)
+#print(df)
 
-df2 = df.groupby(['date','hour'])['value'].mean().unstack()
-print(df2.unstack())
+df2 = df.groupby(['date','hour'])['value'].std() / df.groupby(['date','hour'])['value'].mean()
+df2.dropna(inplace=True)
+df2 = df2.reset_index()
+df2.rename({'value': 'COV'}, axis=1, inplace=True)
 
-df3 = df.groupby(['date','hour'])['value'].std().unstack()
-print(df2.unstack())
-#print(df3.unstack().iloc[:, 1])
+df2['rank'] = df2['COV'].rank()
+mMax = df2['rank'].max()
+mMin = df2['rank'].min()
 
-#df4 = pd.merge(df2.unstack(), df3.unstack(), on = ['hour', 'date'], how = 'inner')
-#df4 = df2.unstack.join(df3.unstack)
-#print(df4)
-df4 = pd.concat([df2, df3], axis=1)
-#print(df4.iloc[:,20:30])
-#print(df4.unstack())
-#print(df4.stack())
+df2['belowThis'] = ((df2['rank'] / mMax) * 100).round(2)
+df3 = df2[['COV', 'belowThis']].sort_values('COV', ascending=True)
+#print(df3)
 
-df5 = df.groupby(['date','hour'])['value'].std() / df.groupby(['date','hour'])['value'].mean()
-df5.fillna(0, inplace=True)
-print(df5.unstack())
+df3g = df3[df3['belowThis'] <= 30]
+df3r = df3[df3['belowThis'] >= 85]
 
-print(df5.count())
+fig, ax = plt.subplots()
+ax.plot(df3['belowThis'], df3['COV'], 'k-', label='COV')
+ax.fill_between(df3g['belowThis'], 0, df3g['COV'], label='0-30%', facecolor='green')
+ax.fill_between(df3r['belowThis'], 0, df3r['COV'], label='85-100%', facecolor='red')
 
-#df5.plot.density()  # tässä luokat määritellään automaattisesti
-
-#sns.pairplot(data = df, vars = ['suunta', 'tunti', 'nopeus'], hue = 'ajoneuvoluokka', diag_kind = 'kde', height = 4)
-sns.distplot(df5, hist = False, kde = True,
-                 kde_kws = {'shade': True, 'linewidth': 3}, 
-                  label = "reino")
+plt.ylim(0, 0.1)
+plt.xlim(0, 100)
+plt.legend(loc='upper left')
 plt.show()
+
