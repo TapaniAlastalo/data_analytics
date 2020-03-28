@@ -26,12 +26,15 @@ df.loc[(df['huom'].notnull()) & (df['KotiM']>df['VierasM']), 'VierasP'] = 1 # vi
 df['JYPin Pisteet'] = 0
 df.loc[(df['KotiJ']==jyp), 'JYPin Pisteet'] = df['KotiP']
 df.loc[(df['VierasJ']==jyp), 'JYPin Pisteet'] = df['VierasP']
-#df['Prev15'] = df['JYPin Pisteet'].shift(1, fill_value=0) + df['JYPin Pisteet'].shift(2, fill_value=0) + df['JYPin Pisteet'].shift(3, fill_value=0) + df['JYPin Pisteet'].shift(4, fill_value=0) + df['JYPin Pisteet'].shift(5, fill_value=0) + df['JYPin Pisteet'].shift(6, fill_value=0) + df['JYPin Pisteet'].shift(7, fill_value=0) + df['JYPin Pisteet'].shift(8, fill_value=0) + df['JYPin Pisteet'].shift(9, fill_value=0) + df['JYPin Pisteet'].shift(10, fill_value=0) + df['JYPin Pisteet'].shift(11, fill_value=0) + df['JYPin Pisteet'].shift(12, fill_value=0) + df['JYPin Pisteet'].shift(13, fill_value=0) + df['JYPin Pisteet'].shift(14, fill_value=0) + df['JYPin Pisteet'].shift(15, fill_value=0)
 #print(df)
 
 df2 = df[['pvm', 'JYPin Pisteet']]
+df2['pvm'] = pd.to_datetime(df2['pvm'], dayfirst=True )
 df2.set_index(['pvm'],inplace=True)
-#print(df2)
-df2['JYPin Pisteet'].rolling(15).sum().plot(style='r:o', markersize=3, label='Edelliset 15 peliä')
-plt.legend()
+
+plt.figure()
+plt.plot(df2['JYPin Pisteet'].rolling(15).sum(), 'r:o', markersize=3, label='Edelliset 15 peliä')
+fig = plt.gcf()
+fig.set_size_inches(8,5)
+plt.legend(loc='lower left')
 plt.show()
