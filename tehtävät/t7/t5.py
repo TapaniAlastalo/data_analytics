@@ -1,53 +1,58 @@
+import numpy as np
 import pandas as pd
-import datetime
-from dateutil.parser import parse
 import matplotlib.pyplot as plt
-#import seaborn as sns
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import train_test_split
 
-df = pd.read_csv('http://student.labranet.jamk.fi/~varpe/datananal2k2020/kerta6/accesslog.zip', sep=",", decimal='.')#, nrows=10000)
 
-#df['date'], df['h'], df['min'], df['s'] = df['timestamp'].str.split(':', 3).str
-#df  = pd.to.datetime(df['timestamp'], format='%d:%b/%Y:%H:%M:%S')
-df['dt'] = df['timestamp'].str.replace(':', ' ', 1)
-df['timestamp'] = df['dt'].map(lambda x: parse(x))
-df['timestamp']  = pd.to_datetime(df['timestamp'])
-df.set_index('timestamp', inplace=True)
-df = df['2018-05-08 10:50:00':'2018-05-08 14:00:00']
-df.sort_index(ascending=True, inplace=True)
+df = pd.read_csv('https://student.labranet.jamk.fi/~varpe/datananal2k2020/kerta7/mushrooms.csv', sep=",", decimal='.')
+
 #print(df)
-
-df2 = pd.DataFrame(df.groupby('eventid').resample('5min')['ip'].nunique())
-df2.reset_index(inplace=True)
+#print("Puuttuvien arvojen lukumäärä per muuttuja (1):\n%s" % df.isnull().sum())
+df2 = df.apply(LabelEncoder().fit_transform)
 #print(df2)
+#print(df2.iloc[:, 1:23])
+x = df2.iloc[:, 1:23]
+y = df['class']
 
-dfMA = df2.loc[(df2['eventid']=='20180508_MQ_MA')]
-dfMA.set_index('timestamp', inplace=True)
-#print(dfMA)
-dfMB = df2.loc[(df2['eventid']=='20180508_MQ_MB')]
-dfMB.set_index('timestamp', inplace=True)
-dfMC = df2.loc[(df2['eventid']=='20180508_MQ_MC')]
-dfMC.set_index('timestamp', inplace=True)
-dfWA = df2.loc[(df2['eventid']=='20180508_MQ_WA')]
-dfWA.set_index('timestamp', inplace=True)
-dfWB = df2.loc[(df2['eventid']=='20180508_MQ_WB')]
-dfWB.set_index('timestamp', inplace=True)
-dfWC = df2.loc[(df2['eventid']=='20180508_MQ_WC')]
-dfWC.set_index('timestamp', inplace=True)
+# Ei tarvita - Skaalataan, jotta kaikki yhtä painavia
+#scaler = StandardScaler()
+#x = scaler.fit_transform(x)
 
-plt.figure()
-plt.plot(dfMA['ip'], label='20180508_MQ_MA')
-plt.plot(dfMB['ip'], label='20180508_MQ_MB')
-plt.plot(dfMC['ip'], label='20180508_MQ_MC')
-plt.plot(dfWA['ip'], label='20180508_MQ_WA')
-plt.plot(dfWB['ip'], label='20180508_MQ_WB')
-plt.plot(dfWC['ip'], label='20180508_MQ_WC')
+# jaotellaan testi- / opetusdata
+xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size = 0.4, random_state = 31)
+#print(xTrain.shape)
+#print(xTest.shape)
 
-fig = plt.gcf()
-fig.set_size_inches(10,6)
-xMin = datetime.datetime(2018,5,8,10,55,0)
-xMax = datetime.datetime(2018,5,8,14,0,0)
-plt.xlim(xMin, xMax)
-plt.xlabel('timestamp')
-plt.ylabel('ip-osoitteet')
-plt.legend()
-plt.show()
+
+# luodaan päätöspuu malli
+model2 = DecisionTreeClassifier(criterion='entropy', max_depth=2)
+model3 = DecisionTreeClassifier(criterion='entropy', max_depth=3)
+model4 = DecisionTreeClassifier(criterion='entropy', max_depth=4)
+model5 = DecisionTreeClassifier(criterion='entropy', max_depth=5)
+
+
+# sovitetetaan, eli generoidaan päätöspuu
+model2.fit(xTrain,yTrain)
+model3.fit(xTrain,yTrain)
+model4.fit(xTrain,yTrain)
+model5.fit(xTrain,yTrain)
+
+
+print("\nmax depth 2:")
+print("Selityskerroin:", model2.score(xTest,yTest))
+print(confusion_matrix(y, model2.predict(x)))
+
+print("\nmax depth 3:")
+print("Selityskerroin:", model3.score(xTest,yTest))
+print(confusion_matrix(y, model3.predict(x)))
+
+print("\nmax depth 4:")
+print("Selityskerroin:", model4.score(xTest,yTest))
+print(confusion_matrix(y, model4.predict(x)))
+
+print("\nmax depth 5:")
+print("Selityskerroin:", model5.score(xTest,yTest))
+print(confusion_matrix(y, model5.predict(x)))
