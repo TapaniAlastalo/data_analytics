@@ -43,16 +43,16 @@ print(confusion_matrix(y, y_pred))
 # luodaan päätöspuu malli
 model2 = DecisionTreeClassifier(criterion='entropy', max_depth=3)
 # sovitetetaan, eli generoidaan päätöspuu
-model2.fit(xScaled,y)
+model2.fit(x,y)
 
 # ennustetaan tulokset
-y_pred2 = model2.predict(xScaled)
+y_pred2 = model2.predict(x)
 # katsotaan tarkkuus
-print("Accuracy 2:", model2.score(xScaled,y))
+print("Accuracy 2:", model2.score(x,y))
 # Confusion Matrix
 print(confusion_matrix(y, y_pred2))
 
-#print(model.predict_proba(xScaled))
+#print(model.predict_proba(x))
 
 # kenttien vaikutus dataan
 print(df.corrwith(y))
