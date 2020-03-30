@@ -1,21 +1,38 @@
 import pandas as pd
-import datetime as dt
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
 
-names=['id-aika', 'longitudi', 'latitudi', 'nopeus']
-df = pd.read_csv('http://student.labranet.jamk.fi/~varpe/datananal2k2020/kerta6/gps.txt', sep="_", decimal=',', names=names)
+df = pd.read_csv('https://student.labranet.jamk.fi/~varpe/datananal2k2020/kerta7/teht1.txt', sep=",", decimal='.')
 
-#df['id'], df['aikaero'] = df['id-aika'].str.split('.', 1).str
-df['id'] = df['id-aika'].str.split('.').str.get(0)
-df['aikaero'] = df['id-aika'].str.split('.').str.get(1).astype(int)
+df['s'] = 0
+df.loc[(df['sauna']!='ei'), 's'] = 1
+df['sauna']=df['s']
+del df['s']
+#print(df)
 
-alkuaika = dt.datetime(2006,1,1,0,0,0)
-df['aika'] = alkuaika + pd.to_timedelta(df['aikaero'], 's')
+x = df[['ala','makuuhuoneita','sauna']]
+y = df['hinta']
 
-df['longitudi'] = df['longitudi'] / 50000
-df['latitudi'] = df['latitudi'] / 100000
-df['nopeus'] = df['nopeus'].str[1:].astype(float) / 10
+model = LinearRegression()
+model.fit(x,y)
+print("Selityskerroin: ", model.score(x,y))
 
-newnames=['id', 'aika', 'longitudi', 'latitudi', 'nopeus']
-df2 = df[newnames]
-print(df2)
+x2 = df[['ala','makuuhuoneita']]
+model.fit(x2,y)
+print("Selityskerroin2: ", model.score(x2,y))
+x3 = df[['ala','sauna']]
+model.fit(x3,y)
+print("Selityskerroin3: ", model.score(x3,y))
+x4 = df[['makuuhuoneita','sauna']]
+model.fit(x4,y)
+print("Selityskerroin4: ", model.score(x4,y))
+
+#---- PARAS----
+model.fit(x,y)
+
+forecast = model.predict(x)
+plt.scatter(y, forecast)
+plt.xlabel('Havaittu')
+plt.ylabel('Ennustettu')
+plt.show()
 

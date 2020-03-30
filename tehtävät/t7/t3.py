@@ -1,40 +1,39 @@
 import pandas as pd
-import datetime
 import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
 
-df = pd.read_csv('http://student.labranet.jamk.fi/~varpe/datananal1k2020/kerta6/liiga.txt', sep=",", decimal='.')
-df['KotiJ'] = df['ottelu'].str.split('-').str.get(0).str.strip()
-df['VierasJ'] = df['ottelu'].str.split('-').str.get(1).str.strip()
+df = pd.read_csv('https://student.labranet.jamk.fi/~varpe/datananal2k2020/kerta7/teht5.txt', sep=",", decimal='.')
 
-jyp = 'JYP'
-df = df[(df['KotiJ']==jyp) | (df['VierasJ']==jyp)]
+#print("Puuttuvien arvojen lukumäärä per muuttuja (1):\n%s" % df.isnull().sum())
+df['hissi']=df['hissi'].map({'ei': 0, 'on': 1})
+df['kunto']=df['kunto'].map({'huono': 0, 'tyyd.': 1, 'hyvä': 0})
+df['keskusta'] = 0
+df.loc[(df['kaupunginosa']=='Keskusta'), 'keskusta'] = 1
+#print("Puuttuvien arvojen lukumäärä per muuttuja (2):\n%s" % df.isnull().sum())
 
-df['KotiM'] = df['tulos'].str.split('-').str.get(0).str.strip().astype(int)
-df['VierasM'] = df['tulos'].str.split('-').str.get(1).str.strip().astype(int)
-
-df['KotiP'] = 0  # "alustetaan" pisteet nolliksi
-df['VierasP'] = 0
-
-df.loc[(df['huom'].isnull()) & (df['KotiM']>df['VierasM']), 'KotiP'] = 3 # kotivoitosta 3 pistettä jos NaN
-df.loc[(df['huom'].notnull()) & (df['KotiM']>df['VierasM']), 'KotiP'] = 2 # kotivoitosta 2 pistettä jos JA/VL
-df.loc[(df['huom'].notnull()) & (df['KotiM']<df['VierasM']), 'KotiP'] = 1 # kotitappiosta 1 piste jos JA/VL
-
-df.loc[(df['huom'].isnull()) & (df['KotiM']<df['VierasM']), 'VierasP'] = 3 # vierasvoitosta 3 pistettä jos NaN
-df.loc[(df['huom'].notnull()) & (df['KotiM']<df['VierasM']), 'VierasP'] = 2 # vierasvoitosta 2 pistettä jos JA/VL
-df.loc[(df['huom'].notnull()) & (df['KotiM']>df['VierasM']), 'VierasP'] = 1 # vierastappiosta 1 piste jos JA/VL
-
-df['JYPin Pisteet'] = 0
-df.loc[(df['KotiJ']==jyp), 'JYPin Pisteet'] = df['KotiP']
-df.loc[(df['VierasJ']==jyp), 'JYPin Pisteet'] = df['VierasP']
+median_kunto = df["kunto"].median()
+df["kunto"].fillna(median_kunto, inplace=True)
+print("Puuttuvien arvojen lukumäärä per muuttuja (3):\n%s" % df.isnull().sum())
 #print(df)
 
-df2 = df[['pvm', 'JYPin Pisteet']]
-df2['pvm'] = pd.to_datetime(df2['pvm'], dayfirst=True )
-df2.set_index(['pvm'],inplace=True)
+x = df[['m2','rakennusvuosi','hissi','kunto','keskusta']]
+y = df['hinta']
 
-plt.figure()
-plt.plot(df2['JYPin Pisteet'].rolling(15).sum(), 'r:o', markersize=3, label='Edelliset 15 peliä')
-fig = plt.gcf()
-fig.set_size_inches(8,5)
-plt.legend(loc='lower left')
+# jaotellaan testi- / opetusdata
+xTrain, xTest, yTrain, yTest = train_test_split(x, y, test_size = 0.4, random_state = 31)
+print(xTrain.shape)
+print(xTest.shape)
+
+# luodaan malli-olio opetusdatalla
+model = LinearRegression()
+model.fit(xTrain,yTrain)
+
+# Testaus testidatalla
+print("Testausdatan selityskerroin:", model.score(xTest,yTest))
+
+forecast = model.predict(xTest)
+plt.scatter(yTest, forecast)
+plt.xlabel('Havaittu')
+plt.ylabel('Ennustettu')
 plt.show()

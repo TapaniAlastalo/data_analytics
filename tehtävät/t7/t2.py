@@ -1,27 +1,36 @@
 import pandas as pd
-import datetime
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import confusion_matrix
+from sklearn.tree import export_graphviz
+import seaborn as sns
 
-names=['id-aika', 'longitudi', 'latitudi', 'nopeus']
-df = pd.read_csv('http://student.labranet.jamk.fi/~varpe/datananal2k2020/kerta6/epl20200309.txt', sep=";", decimal='.')
-
-df['Date']  = pd.to_datetime(df['Date'])
+df = pd.read_csv('https://student.labranet.jamk.fi/~varpe/datananal2k2020/kerta7/teht2.txt', sep=",", decimal='.')
+df['sukupuoli']=df['sukupuoli'].map({'nainen': 0, 'mies': 1})
 print(df)
 
-kkeniten = df.resample('M',on='Date', kind='period').size().sort_values(ascending=False).head(10)
-print(kkeniten)
+x = df[['tulot','naimisissa','sukupuoli']]
+y = df['ostaa']
 
-#viikoina ma-su
-wkeniten = df.resample('W',on='Date', kind='period', label='left').size().sort_values(ascending=False).head(10)
-print(wkeniten)
+# luodaan malli-olio
+model = DecisionTreeClassifier(criterion='entropy', max_depth=3)
+# sovitetetaan, eli generoidaan päätöspuu
+model.fit(x,y)
 
-#vkonpäivinä
-df['DoW'] = df['Date'].dt.dayofweek
-df['Day'] = df['Date'].dt.day_name()
+# ennustetaan tulokset
+y_pred = model.predict(x)
+# katsotaan tarkkuus
+print("Accuracy:", model.score(x,y))
+# Confusion Matrix
+print(confusion_matrix(y, y_pred))
 
-#test = df['DoW'].groupby([df['DoW']]).count()
-#print(test)
-pveniten = df.groupby('DoW')['DoW'].count()
-print(pveniten)
 
-#best = df['DoW'].dt.day_name
-#print(best)
+export_graphviz(decision_tree=model, out_file="tree_ostaako.dot",
+                feature_names=x.columns, class_names=True, filled=True, rounded=True)
+
+
+#forecast = model.predict(x)
+#plt.scatter(y, forecast)
+#plt.xlabel('Havaittu')
+#plt.ylabel('Ennustettu')
+#plt.show()
