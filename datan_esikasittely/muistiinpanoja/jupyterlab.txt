@@ -1,0 +1,16 @@
+Jupyter Lab
+Alla on listattu keskeisimmät pikanäppäimet notebookin käsittelyyn
+Pikanäppäinyhdistelmä	Selitys
+Enter	Siirry editointitilaan
+Esc	Siirry komentotilaan
+b	Luo uusi solu
+c	Kopioi valittu solu
+x	Leikkaa valittu solu
+v	Liitä leikattu / kopioitu solu
+dd	Poista valittu solu
+z	Peruuta edellinen poisto
+Ctrl + s	Tallenna notebook
+Ctrl + a	Valitse kaikki solut
+Shift + Enter	Aja valitut solut
+m	Muunnetaan valittu solu markdown-soluksi
+y	Muunnetaan valittu solu Python-koodisoluksi
