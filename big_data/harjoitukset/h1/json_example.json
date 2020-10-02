@@ -1,0 +1,64 @@
+[
+    {
+        "name": "tiger",
+        "property1": "feline",
+        "property2": "mainly asian",
+        "property3": "Stripes"
+
+    },
+    {
+        "name": "turtle",
+        "property1": "reptile",
+        "property2": "Can't run, but sure can hide",
+        "property3": "This animal is very slow"
+    },
+    {
+        "name": "dog",
+        "property1": "mammal",
+        "property2": "omnivore",
+        "property3": "Best friend"
+    },
+    {
+        "name": "cat",
+        "property1": "mammal",
+        "property2": "feline pet",
+        "property3": "meow!"  
+    },
+    {
+        "name": "ant",
+        "property1": "There are many different species of this insect around the world.",
+        "property2": "They can be brown, red and black",
+        "property3": "They live in soil and cavities in wood and plants"
+    },
+    {
+        "name": "cow",
+        "property1": "Its stomach contains four separate compartments",
+        "property2": "Their flautulence is responsible for a lot of the greenhouse gases.",
+        "property3": "Their milk is very popular among human populations"
+    },
+    {
+        "name": "crocodile",
+        "property1": "It eats fish, turtle and mammals.",
+        "property2": "lives solitarily in murky, warm and quiet waters",
+        "property3": "This reptile was around in times of the dinousaurs"
+
+    },
+    {
+        "name": "bird",
+        "property1": "There are many different species of this animal, almost everywhere in the world",
+        "property2": "often omnivore",
+        "property3": "peak and wings"
+    },
+    {
+        "name": "pig",
+        "property1": "Loves belly scratches",
+        "property2": "It's one of the smartest animals on Earth, equivalent to a 3 year old child",
+        "property3": "oink!"
+    },
+    {
+        "name": "flea",
+        "property1": "an insect",
+        "property2": "there used to be circuses where they acted",
+        "property3": "cats and dogs are like 24/7 buses for these tiny tiny creatures"
+    }
+]
