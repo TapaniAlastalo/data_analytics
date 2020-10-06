@@ -132,3 +132,45 @@ jps
 
 putty tunnelointi ja tsekki selaimella http://localhost:8080/
 
+
+7
+netstat -an | grep LISTEN
+sudo bin/kafka-server-stop.sh
+sudo bin/zookeeper-server-stop.sh
+cd /var/lib/kafka
+
+sudo nano config/server-3.properties
+
+sudo bin/start-cluster.sh
+
+python --version
+sudo apt install python3
+sudo apt install python3-pip
+pip3 install confluent-kafka simplejson fake
+
+wget http://hantt.pages.labranet.jamk.fi/bigdata/exercises/sensor-data.py
+
+bin/kafka-topics.sh --create --bootstrap-server 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 --replication-factor 3 --partitions 3 --topic sensordata
+
+python3 sensor-data.py -k 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 -t sensordata -r 1 -n 5
+
+spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0 kafka-spark-demo.py 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 sensordata
+
+sensors = lines.map(lambda y : "Aikaleima: " + str(y['date']) + " | AnturiID: " + str(y['id']) + " | Lämpötila: " + str(y['main']['temperature'])+ " | Kosteus: " + str(y['main']['humidity'])+ " | Paikkatieto: " + str(y['coord']['lat'])+ ", " + str(y['coord']['lon']))
+
+brokers, topic = sys.argv[1:]
+kvs = KafkaUtils.createDirectStream(ssc, [topic],{"metadata.broker.list": brokers})
+lines = kvs.map(lambda x: json.loads(x[1]))
+filtered_lines = lines.filter(lambda y : (y['main']['temperature'] >= 10 and y['main']['temperature'] <= 25))
+sensors = filtered_lines.map(lambda y : str(y['id']) + ", " + str(y['main']['temperature']))
+sensors.foreachRDD(lambda x: x.foreach(lambda y: print(y)))
+ssc.start()
+ssc.awaitTermination()
+
+
+8
+
+
+
+
+
