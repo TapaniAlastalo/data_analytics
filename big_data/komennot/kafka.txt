@@ -275,6 +275,74 @@ use "sensordatadb";
 select * from sensordata;
 
 
+H10
+
+Kassandra koneelle kotijuureen:
+sudo apt update
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 68818C72E52529D4
+echo "deb http://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+sudo apt update
+sudo apt install -y mongodb-org
+sudo mkdir /etc/mongodata
+
+sudo nano /etc/mongod.conf
+"
+bindIp: 192.168.1.24
+"
+sudo mongod --dbpath /etc/mongodata --config /etc/mongod.conf
+netstat -an | grep LISTEN
+
+Spark master koneelle:
+sudo apt install python3-setuptools
+git clone https://github.com/mongodb/mongo-hadoop.git /usr/local/spark/mongo-hadoop
+cd /usr/local/spark/mongo-hadoop/spark/src/main/python
+sudo python3 setup.py install
+
+kaikille spark koneille:
+sudo apt install python3-pip && pip3 install pymongo
+
+master:
+cd /usr/local/spark
+(cp conf/spark-env.sh.template conf/spark-env.sh)
+nano conf/spark-env.sh
+"
+export PYTHONPATH=$PYTHONPATH:'/usr/local/spark/mongo-hadoop/spark/src/main/python/'
+"
+
+wget -P /usr/local/spark/jars https://repo1.maven.org/maven2/org/mongodb/mongo-hadoop/mongo-hadoop-spark/2.0.2/mongo-hadoop-spark-2.0.2.jar
+
+sudo nano kafka-spark-mongodb-demo.py
+"
+rdd.foreachRDD(lambda z: z.saveToMongoDB('mongodb://192.168.1.24:27017/sensordatadb.sensordata'))
+"
+
+kafkan koneelta:
+ python3 sensor-data.py -k 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 -t sensordata -r 1 -n 5
+
+spark-master koneelta:
+spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0,org.mongodb.spark:mongo-spark-connector_2.11:2.4.0,org.mongodb.mongo-hadoop:mongo-hadoop-core:1.3.1,org.mongodb:mongo-java-driver:3.1.0 --jars jars/mongo-hadoop-spark-2.0.2.jar kafka-spark-mongodb-demo.py 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 sensordata
+
+mongodb koneelta (kassandra):
+mongo 192.168.1.24
+show databases;
+use sensordatadb;
+show collections;
+db.sensordata.find();
+
+t1
+db.sensordata.find({"sensor":9601});
+t2
+db.sensordata.find({"temp": {$gte: 20}},{"coord_lat":true,"coord_lon":true,"temp":true,"_id":false});
+t3
+db.sensordata.find({"hum": {$gte: 90, $lte:92}},{"sensor":true,"hum":true,"event_time":true,"_id":false});
+
+
+T11
+
+
+
+
+
 
 127.0.0.1 localhost
 192.168.1.15 kafka
