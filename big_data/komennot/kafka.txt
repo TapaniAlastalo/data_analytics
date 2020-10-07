@@ -250,6 +250,32 @@ use sensordatadb
 select * from sensordata
 
 
+H9
+Kassandra koneelle
+Zeppelin asennus:
+wget http://www.nic.funet.fi/pub/mirrors/apache.org/zeppelin/zeppelin-0.8.2/zeppelin-0.8.2-bin-all.tgz
+tar xvf zeppelin-0.8.2-bin-all.tgz
+sudo mv zeppelin-0.8.2-bin-all /var/lib/zeppelin
+
+konfiguraatio tiedosto
+cd /var/lib/zeppelin
+sudo cp conf/zeppelin-env.sh.template conf/zeppelin-env.sh
+sudo nano conf/zeppelin-env.sh
+"
+export ZEPPELIN_ADDR=192.168.1.24
+"
+sudo bin/zeppelin-daemon.sh start
+netstat -an | grep LISTEN
+
+
+oikeudet, porttiohjaukset ja tunnelointi.
+
+cqlsh
+use "sensordatadb";
+select * from sensordata;
+
+
+
 127.0.0.1 localhost
 192.168.1.15 kafka
 192.168.1.19 master
