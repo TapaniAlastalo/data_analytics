@@ -1,6 +1,20 @@
+
 H2-3
+Muokataan ssh astuksia:
+sudo nano /etc/ssh/sshd_config
+"
+Varmista, että kohtaa PasswordAuthentication ei ole kommentoitu #-merkillä ja arvo on yes
+Varmista myös, että kohtaa PermitRootLogin ei ole kommentoitu ja aseta sen arvoksi no
+Sallitaan ainoastaan käyttäjän ubuntu kirjautuminen paikallisesta verkosta lisäämällä tiedostoon rivi AllowUsers ubuntu@192.168.1.0/24
+"
+
+Uudelleen käynnistetään:
 sudo service sshd restart
+Testataan:
 ssh ubuntu@ip-osoite
+
+lisää ip osoite ja nimeä kone:
+sudo nano /etc/hosts
 
 kafka:
 wget http://www.nic.funet.fi/pub/mirrors/apache.org/kafka/2.2.2/kafka_2.12-2.2.2.tgz
@@ -104,13 +118,6 @@ bin/kafka-console-consumer.sh --bootstrap-server localhost:9092,localhost:9093,l
 
 6
 
-192.168.1.15 kafka
-192.168.1.19 master
-192.168.1.6 slave1
-192.168.1.17 slave2
-192.168.1.33 slave3
-
-
 tar xvf spark-2.4.7-bin-hadoop2.7.tgz
 sudo mv spark-2.4.7-bin-hadoop2.7 /usr/local/spark
 
@@ -124,9 +131,11 @@ export JAVA_HOME='/usr/lib/jvm/java-8-openjdk-amd64'
 export PYSPARK_PYTHON='/usr/bin/python3'
 
 käynnistä master:
+cd /usr/local/spark
 ./sbin/start-master.sh
 käynnistä slave:
-/usr/local/spark/sbin/start-slave.sh spark://192.168.1.19:7077
+cd /usr/local/spark
+./sbin/start-slave.sh spark://192.168.1.19:7077
 tsekki:
 jps
 
@@ -168,9 +177,83 @@ ssc.start()
 ssc.awaitTermination()
 
 
-8
+H8
+
+Asennetaan Cassandra:
+Listätään repo sources.list tiedostoon:
+sudo echo "deb https://downloads.apache.org/cassandra/debian 311x main" | sudo tee -a /etc/apt/sources.list.d/cassandra.sources.list
+
+Lisätään repon avaintiedot (tarvittaessa sudo su):
+sudo curl https://downloads.apache.org/cassandra/KEYS | sudo apt-key add -
+
+sudo apt update
+sudo apt install cassandra
+sudo service cassandra start
+Cassandran komentorivi käyttis (Ctrl+d sulkee)
+cqlsh
+
+Tietokanta anturidatalle:
+create keyspace sensordatadb with replication = {'class':'SimpleStrategy', 'replication_factor':1};
+
+use sensordatadb;
+
+create table sensordata(sensor int, date text, event_time text, coord_lat float, coord_lon float, temp float, hum int, primary key ((sensor,date),event_time));
+
+describe sensordata;
+
+Tiedon tallentaminen tietokantaan:
+sudo nano /etc/cassandra/cassandra.yaml
+"
+start_rpc: true
+rpc_address: 0.0.0.0
+broadcast_rpc_address: 192.168.1.24
+listen_address: 192.168.1.24
+seed_provider:
+    - seeds: "192.168.1.24"
+"
+
+sudo service cassandra restart
+Tarkasta, että Cassandra kuuntelee porttia 9042 osoitteessa 0.0.0.0:
+netstat -an | grep LISTEN
+
+spark-master:
+ssh ubuntu@master
+sudo nano /usr/local/spark/kafka-spark-demo.py
+"
+from pyspark_cassandra import CassandraSparkContext, saveToCassandra
+from datetime import datetime
+..
+appConf = SparkConf().setAppName("sensorDataApp").set("spark.cassandra.connection.host", "192.168.1.24")
+sc = CassandraSparkContext(conf=appConf)
+..
+rdd = filtered_lines.map(lambda x : {"sensor": x['id'], "date": datetime.now().strftime("%d.%m.%y"), "event_time": datetime.now().strftime("%H:%M:%S"), "coord_lat":x['coord']['lat'], "coord_lon":x['coord']['lon'], "hum":x['main']['humidity'], "temp":x['main']['temperature']})
+
+rdd.foreachRDD(lambda z: z.saveToCassandra("sensordatadb","sensordata"))
+..
+ssc.start()
+"
+käynnistä kafka koneen klusteri:
+ssh ubuntu@kafka
+sudo /var/lib/kafka/bin/start-cluster.sh
+
+käynnistä anturidata skripti kafkalla:
+cd /var/lib/kafka
+python3 sensor-data.py -k 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 -t sensordata -r 1 -n 5
+
+käynnistä anturidata skripti spark-masterilla:
+cd /usr/local/spark
+bin/spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0,anguenot:pyspark-cassandra:2.4.0 kafka-spark-demo.py 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 sensordata
+
+tarkastaminen cassandralla:
+cqlsh
+use sensordatadb
+select * from sensordata
 
 
-
-
-
+127.0.0.1 localhost
+192.168.1.15 kafka
+192.168.1.19 master
+192.168.1.6 slave1
+192.168.1.17 slave2
+192.168.1.33 slave3
+192.168.1.24 storage (kassandra)
