@@ -338,11 +338,48 @@ db.sensordata.find({"hum": {$gte: 90, $lte:92}},{"sensor":true,"hum":true,"event
 
 
 T11
+Mongo eli kassandra kone:
+asennetaan nodejs
+sudo apt install nodejs
+node -v
+sudo mkdir /var/web
+sudo apt install npm
+cd /var/web
+
+sudo wget -P /var/web http://hantt.pages.labranet.jamk.fi/bigdata/exercises/server.js
+
+sudo nano server.js
+"
+MongoClient.connect('mongodb://192.168.1.24:27017', { useNewUrlParser: true }, (err, client) => {
+..
+db.sensordata.aggregate([                     
+                     { $group: { _id: "$sensor", "minTemp":{$min: "$temp"}, "maxTemp":{$max: "$temp"}, "avgTemp":{$avg: "$temp"}, "minHum":{$min: "$hum"}, "maxHum":{$max: "$hum"}, "avgHum":{$avg: "$hum"} } }
+                   ])
+..
+"
+
+sudo wget -P /var/web/views http://hantt.pages.labranet.jamk.fi/bigdata/exercises/index.ejs
+
+..
 
 
+käynnistä zookeeper ja brokerit kafkalla:
 
+varmista, että sparkit päällä (master & slaves)
 
+käynnitä mongodb kassandran koneella:
+sudo mongod --dbpath /etc/mongodata --config /etc/mond.conf
 
+käynnistä master-spark skripti:
+/usr/local/spark$ spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0,org.mongodb.spark:mongo-spark-connector_2.11:2.4.0,org.mongodb.mongo-hadoop:mongo-hadoop-core:1.3.1,org.mongodb:mongo-java-driver:3.1.0 --jars jars/mongo-hadoop-spark-2.0.2.jar kafka-spark-mongodb-demo.py 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 sensordata
+
+käynnistä kafkan python skripti:
+ python3 sensor-data.py -k 192.168.1.15:9092,192.1.1.15:9093,192.168.1.15:9094 -t sensordata -r 1 -n 5
+
+käynistä nodejs mongo eli kassandra koneella:
+node server.js
+
+testaa localhost:3000
 
 127.0.0.1 localhost
 192.168.1.15 kafka
