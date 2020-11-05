@@ -1,0 +1,16 @@
+asenna anaconda
+
+asenna tensorflow:
+https://docs.anaconda.com/anaconda/user-guide/tasks/tensorflow/
+
+käynnistä anaconda prompt
+conda create -n tf tensorflow
+
+aktivoi tf virtuaaliympäristö
+conda activate tf
+deaktivoi tf virtuaaliympäristö
+conda deactivate tf
+
+asennetaan paketit virtuaaliympäristöön
+conda install pandas
+conda install skicit learn
