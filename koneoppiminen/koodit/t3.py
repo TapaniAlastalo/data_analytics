@@ -3,10 +3,15 @@ import numpy as np
 from sklearn import linear_model
 import matplotlib.pyplot as plt
 
-data = [[1.00,1.00],[2.00,2.00],[3.00,1.30],[4.00,3.75],[5.00,2.25],[6.00, None]] 
+data = [[1.00,1.00],[2.00,2.00],[3.00,1.30],[4.00,3.75],[5.00,2.25]] #,[6.00, None]] 
 df = pd.DataFrame(data, columns=['X', 'Y'])
-df_train = df[:5]
+
+df_train = df[:]
 df_test = df[4:]
+
+df_test = df_test.append({'X': 6.00}, ignore_index=True)
+#df_train = df[:6]
+#df_test = df[4:]
 
 X = np.array(df_train['X'])
 X = X.reshape(-1,1) # vain jos yksiulotteinen taulukko
@@ -27,3 +32,4 @@ plt.plot(df_test['X'].values, df_test['Ennuste'].values, color='red', linewidth=
 plt.show()
 
 print('Mallin kertoimet ovat \n', model.coef_, model.intercept_)
+df_results = df_train.append(df_test.iloc[1:], ignore_index = True)

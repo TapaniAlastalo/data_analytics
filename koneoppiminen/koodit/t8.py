@@ -2,42 +2,35 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
-from sklearn import linear_model
-from sklearn.metrics import accuracy_score
-from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
+import tensorflow as tf
+from tensorflow import keras
 
 df = pd.read_csv('data/fruit_data.csv', sep=',', encoding='utf-8')
 
 X = np.array(df[['mass', 'width', 'height', 'color_score']])
 
-fruit_codes = {'apple':0,  'lemon':1, 'mandarin':2, 'orange':3}
-df['fruit_code'] = df['fruit_name'].map(fruit_codes)
+y = np.array(pd.get_dummies(df['fruit_name']))
 
-y = np.array(df['fruit_code'])
-
+# Skaalataan X arvot keskiarvoon 0 ja keskihajontaan 1
 scaler = preprocessing.StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# LOGISTIC REGRESSION
-model = linear_model.LogisticRegression(multi_class='multinomial', solver='newton-cg')
-model.fit(X_scaled, y)
-ennuste = model.predict(X_scaled)
-print(accuracy_score(y, ennuste))
-df['LRennuste'] = ennuste
 
+model = keras.Sequential([
+    # 1. piilotettu / input kerros
+    keras.layers.Dense(30, activation=tf.nn.relu, input_shape=(X_scaled.shape[1],)),
+    # 2. piilotetu kerros
+    keras.layers.Dense(30, activation=tf.nn.relu),
+    # output kerros -> 4 output luokkaa, softmax tulostaa ko. luokan todennäköisyyden
+    keras.layers.Dense(4, activation=tf.nn.softmax)
+    ])
 
-# SUPPORT VECTOR CLASSIFIER
-model = SVC()
-model.fit(X_scaled, y)
-ennuste = model.predict(X_scaled)
-print(accuracy_score(y, ennuste))
-df['SVMennuste'] = ennuste
+model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.001),
+              loss='categorical_crossentropy',
+              metrics=['categorical_accuracy'])
 
+model.fit(X_scaled, y, epochs=20, batch_size=1)
 
-# SUPPORT VECTOR CLASSIFIER
-model = KNeighborsClassifier()
-model.fit(X_scaled, y)
-ennuste = model.predict(X_scaled)
-print(accuracy_score(y, ennuste))
-df['KNNennuste'] = ennuste
+# hakee sarakkeesta ennusteen, jonka todennäköisyys suurin
+ennuste = np.argmax(model.predict(X_scaled), axis=1)
+df['Ennuste'] = ennuste
