@@ -14,3 +14,10 @@ conda deactivate tf
 asennetaan paketit virtuaaliympäristöön
 conda install pandas
 conda install skicit learn
+
+
+
+# spyderin blokki ajo
+#%%
+plt.imshow(x_train[0], cmap='Greys')
+#%%
