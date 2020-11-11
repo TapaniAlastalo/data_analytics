@@ -9,6 +9,7 @@ import numpy as np
 from tensorflow.keras.preprocessing.image import load_img
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.preprocessing.image import array_to_img
+#from tensorflow.keras.preprocessing import image_dataset_from_directory
 
 #im = cv2.imread('data/train/train/cat.0.jpg')
 #img = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)   # BGR -> RGB
@@ -16,7 +17,7 @@ from tensorflow.keras.preprocessing.image import array_to_img
 #print (type(img))
 
 # load the image
-img = load_img('data/train/cat.0.jpg')
+img = load_img('data/train/cats/cat.0.jpg')
 print("Orignal:" ,type(img))
 
 # convert to numpy array
@@ -27,7 +28,27 @@ print(type(img_array))
 print("type:",img_array.dtype)
 print("shape:",img_array.shape)
 
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+print("test")
+
+path = 'data/train'
+imageDataGenerator = tf.keras.preprocessing.image.ImageDataGenerator()
+imgClasses =  ["dogs", "cats"]
+
+#(x_train, y_train), (x_test, y_test) 
+
+s = tf.keras.preprocessing.image.DirectoryIterator(
+    path,
+    imageDataGenerator,
+    color_mode="rgb",
+    classes=imgClasses,
+    #target_size=(256, 256),
+    #save_format='jpg'
+    )
+
+print("loaded")
+print(s)
+
+#(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 
 plt.imshow(x_train[0], cmap='Greys')
 

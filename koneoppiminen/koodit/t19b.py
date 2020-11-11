@@ -19,10 +19,14 @@ df_test = df.drop(df_train.index)
 
 input_variables = ['TeamId', 'ProviderId', 'Lifetime', 'PressureInd', 'MoistureInd', 'TemperatureInd']
 X = np.array(df[input_variables])
-y = np.array(pd.get_dummies(df['Broken']))
 
+y = np.array(pd.get_dummies(df['Broken']))
+#y = np.array((df['Broken']))
+
+# Skaalataan X arvot keskiarvoon 0 ja keskihajontaan 1
 scaler = preprocessing.StandardScaler()
 X_scaled = scaler.fit_transform(X)
+
 
 model = keras.Sequential([
     # 1. piilotettu / input kerros
@@ -43,8 +47,12 @@ predictedResults = model.predict(X_scaled)
 model.summary()
 roundedResults = np.round(predictedResults, 3)
 df['Breakdown Risk'] = roundedResults[:,1]
+#ennuste = np.argmax(predictedResults, axis=1)
+#df['Prediction'] = ennuste
 
 dfResults1 = df.iloc[:, [0,1,2,3,4,5,6,7,10]].sample(20)
+
 dfResults2 = df[df['Broken']==0]
 dfResults2.sort_values(by=['Breakdown Risk'], ascending=False, inplace=True)
+
 rikkoutuvat = dfResults2.iloc[0:10, [0,10]]

@@ -1,5 +1,6 @@
 .pynb_checkpoints
 testi
+train
 /tehtävät/.vs
 .vscode
 .vs
