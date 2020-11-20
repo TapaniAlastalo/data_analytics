@@ -36,17 +36,18 @@ imgClasses =  ["dogs", "cats"]
 
 #(x_train, y_train), (x_test, y_test) 
 
-s = tf.keras.preprocessing.image.DirectoryIterator(
+loaded = tf.keras.preprocessing.image.DirectoryIterator(
     path,
     imageDataGenerator,
     color_mode="rgb",
-    classes=imgClasses,
-    #target_size=(256, 256),
-    #save_format='jpg'
+    #classes=imgClasses,
+    classes=None, class_mode='categorical',
+    target_size=(256, 256),
+    save_format='jpg'
     )
 
 print("loaded")
-print(s)
+print(loaded)
 
 #(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 

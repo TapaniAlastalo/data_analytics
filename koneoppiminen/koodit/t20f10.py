@@ -22,8 +22,8 @@ df_test = df.drop(df_train.index)
 # train
 X = np.array(df_train.iloc[:,1:40])
 
-#y_int = np.array(df_train[predict_field])
-#y = to_categorical(y_int)
+#y_int = np.array(df[predict_field])
+#y = tf.keras.utils.to_categorical(y_int)
 y = np.array(pd.get_dummies(df_train[predict_field]))
 
 scaler = preprocessing.StandardScaler()

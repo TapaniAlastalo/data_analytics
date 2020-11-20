@@ -361,25 +361,36 @@ db.sensordata.aggregate([
 sudo wget -P /var/web/views http://hantt.pages.labranet.jamk.fi/bigdata/exercises/index.ejs
 
 ..
-
+STARTTI
 
 käynnistä zookeeper ja brokerit kafkalla:
+netstat -an | grep LISTEN
+cd /var/lib/kafka
+sudo bin/kafka-server-stop.sh
+sudo bin/zookeeper-server-stop.sh
+sudo bin/start-cluster.sh
 
-varmista, että sparkit päällä (master & slaves)
 
-käynnitä mongodb kassandran koneella:
-sudo mongod --dbpath /etc/mongodata --config /etc/mond.conf
-
-käynnistä master-spark skripti:
-/usr/local/spark$ spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0,org.mongodb.spark:mongo-spark-connector_2.11:2.4.0,org.mongodb.mongo-hadoop:mongo-hadoop-core:1.3.1,org.mongodb:mongo-java-driver:3.1.0 --jars jars/mongo-hadoop-spark-2.0.2.jar kafka-spark-mongodb-demo.py 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 sensordata
+varmista, että spark koneet päällä (master & slaves)
 
 käynnistä kafkan python skripti:
- python3 sensor-data.py -k 192.168.1.15:9092,192.1.1.15:9093,192.168.1.15:9094 -t sensordata -r 1 -n 5
+cd /var/lib/kafka
+python3 sensor-data.py -k 192.168.1.15:9092,192.1.1.15:9093,192.168.1.15:9094 -t sensordata -r 1 -n 5
+
+käynnitä mongodb kassandran koneella:
+sudo mongod --dbpath /etc/mongodata --config /etc/mongod.conf
+
+käynnistä master-spark skripti:
+cd /usr/local/spark
+spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0,org.mongodb.spark:mongo-spark-connector_2.11:2.4.0,org.mongodb.mongo-hadoop:mongo-hadoop-core:1.3.1,org.mongodb:mongo-java-driver:3.1.0 --jars jars/mongo-hadoop-spark-2.0.2.jar kafka-spark-mongodb-demo.py 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 sensordata
 
 käynistä nodejs mongo eli kassandra koneella:
+cd /var/web
 node server.js
 
-testaa localhost:3000
+avaa tunnelointi monitor puttyssä & testaa selaimella:
+localhost:3000
+localhost:8081
 
 127.0.0.1 localhost
 192.168.1.15 kafka
@@ -388,3 +399,24 @@ testaa localhost:3000
 192.168.1.17 slave2
 192.168.1.33 slave3
 192.168.1.24 storage (kassandra)
+
+
+### HARKKATYÖ
+Käynnistä clusteri
+
+luo Kafkalle topic temperaturedatalle:
+bin/kafka-topics.sh --create --bootstrap-server 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 --replication-factor 3 --partitions 3 --topic temperaturedata
+
+käynnistä kafkan python skripti:
+cd /var/lib/kafka
+python3 temperature-data.py -k 192.168.1.15:9092,192.1.1.15:9093,192.168.1.15:9094 -t temperaturedata -w 1
+
+käynnitä mongodb kassandran koneella:
+sudo mongod --dbpath /etc/mongodata --config /etc/mongod.conf
+
+käynnistä master-spark skripti:
+cd /usr/local/spark
+spark-submit --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.0.0,org.mongodb.spark:mongo-spark-connector_2.11:2.4.0,org.mongodb.mongo-hadoop:mongo-hadoop-core:1.3.1,org.mongodb:mongo-java-driver:3.1.0 --jars jars/mongo-hadoop-spark-2.0.2.jar kafka-spark-mongodb-temp.py 192.168.1.15:9092,192.168.1.15:9093,192.168.1.15:9094 temperaturedata
+
+
+, "date": datetime(x['dt']).strftime("%d.%m.%y"), "time": datetime(x['dt']).strftime("%H:%M:%S")
