@@ -11,5 +11,16 @@ conda activate syvaoppiminen
 deaktivoi virtuaaliympäristö
 conda deactivate syvaoppiminen
 
+asenna paketit kyseiseen ympärsitöön, jos jäi välistä luontivaiheessa
+conda install jupyter spyder #etc
+
 käynnistä jupyter
 jupyter notebook
+
+tai käynnistä spyder..
+spyder(syvaoppiminen)
+
+# spyderin blokki ajo
+#%%
+plt.imshow(x_train[0], cmap='Greys')
+#%%
