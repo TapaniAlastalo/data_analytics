@@ -1,0 +1,15 @@
+avaa conda prompt (administrator)
+
+asenna paketit
+conda install jupyter nb_conda_kernels
+
+luo virtuaaliympäristö
+conda create --name syvaoppiminen pandas numpy matplotlib seaborn ipykernel scikit-learn tensorflow
+
+aktivoi virtuaaliympäristö
+conda activate syvaoppiminen
+deaktivoi virtuaaliympäristö
+conda deactivate syvaoppiminen
+
+käynnistä jupyter
+jupyter notebook
