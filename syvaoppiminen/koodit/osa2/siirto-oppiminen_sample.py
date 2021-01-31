@@ -139,3 +139,6 @@ plt.plot(test_X,preds)
 
 # Onnistuimme tekemään saman mallin luomalla neuroverkon rakenteen uudestaan kuvan avulla
 # ja tuomalla painoarvot tiedostosta.
+
+#%%
+

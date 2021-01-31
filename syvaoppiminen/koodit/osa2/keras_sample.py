@@ -300,3 +300,7 @@ axes[1].set_xlabel("Epochs")
 axes[1].plot(accuracies)
 plt.show()
 
+#%%
+
+# Model luokan käyttö https://www.tensorflow.org/tutorials/quickstart/advanced
+# Functional API:n dokumentaatio https://www.tensorflow.org/guide/keras/functional

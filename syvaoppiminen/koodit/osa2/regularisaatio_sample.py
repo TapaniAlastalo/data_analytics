@@ -134,3 +134,6 @@ plt.show()
 # Malleissa, joissa on implementoitu L2 ja Dropout - regularisaatiomenetelmiä,
 # koulutus- ja testitarkkuus pysyvät keskimäärin huippuarvossaan koulutuksen ajan.
 
+#%%
+# L1 ja L2 regularisaatiot https://towardsdatascience.com/intuitions-on-l1-and-l2-regularisation-235f2db4c261
+# Keras ylioppiminen esimerkki https://machinelearningmastery.com/how-to-reduce-overfitting-in-deep-neural-networks-with-weight-constraints-in-keras/

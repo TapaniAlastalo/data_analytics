@@ -192,3 +192,6 @@ for feature_map in feature_maps:
     print(f'Block {block_counter} Feature matriisi')
     block_counter += 1
     plt.show()
+
+#%%
+# Feature maps visualisointi https://machinelearningmastery.com/how-to-visualize-filters-and-feature-maps-in-convolutional-neural-networks/
