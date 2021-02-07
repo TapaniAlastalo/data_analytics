@@ -21,18 +21,65 @@ model_cnn = tf.keras.Sequential([
     tf.keras.layers.Dense(10)
 ])
 # Lataa malliin painoarvot "weights.h5" tiedostosta.
-model_cnn.load_weights('weights.h5')
+model_cnn.load_weights('c:/data/weights.h5')
+
+#%%
+layer_input = tf.keras.Input(shape=(28,28,1)) 
+#model_input = tf.keras.Input(shape=(train_X.shape[1],train_X.shape[2],1)) 
+# konvoluutiokerros
+layer_conv1 = tf.keras.layers.Conv2D(filters=24, kernel_size=(5,5),strides=1, padding='same', activation='relu')(layer_input)
+layer_maxpool1 = tf.keras.layers.MaxPooling2D(pool_size=(2,2),strides=(2,2))(layer_conv1)
+layer_drop1 = tf.keras.layers.Dropout(0.2)(layer_maxpool1)
+layer_conv2 = tf.keras.layers.Conv2D(filters=48, kernel_size=(5,5),strides=1, padding='same', activation='relu')(layer_drop1)
+layer_drop2 = tf.keras.layers.Dropout(0.4)(layer_conv2)
+layer_conv3 = tf.keras.layers.Conv2D(filters=64, kernel_size=(5,5),strides=1, padding='same', activation='relu')(layer_drop2)
+layer_maxpool2 = tf.keras.layers.MaxPooling2D(pool_size=(2,2),strides=(2,2))(layer_conv3)
+layer_flatten1 = tf.keras.layers.Flatten()(layer_maxpool2)
+layer_dense1 = tf.keras.layers.Dense(256, activation='relu')(layer_flatten1)
+layer_output = tf.keras.layers.Dense(10)(layer_dense1)
+
+model_cnn_b = tf.keras.Model(inputs=layer_input, outputs=layer_output)
+# Lataa malliin painoarvot "weights.h5" tiedostosta.
+model_cnn_b.load_weights('c:/data/weights.h5')
+
 # Tehtävän toteutus tähän
+#%%
+print(model_cnn)
+print(model_cnn.output)
+print(model_cnn.layers)
+print(model_cnn.layers[6])
+
+model_cnn = tf.keras.Sequential([    
+    tf.keras.layers.InputLayer((28,28,1)),
+    #tf.keras.layers.Dense(1, input_shape=(28,28,1), activation='relu'), # Tarvittava neuronien määrä nähdään kuvasta "output" - kentästä
+    #tf.keras.Input(shape=(28,28,1)),
+    tf.keras.layers.Conv2D(24, kernel_size=(5,5), activation='relu', strides=1, padding='same'),
+    tf.keras.layers.MaxPooling2D(pool_size=(2,2), strides=(2,2)),
+    tf.keras.layers.Dropout(0.2),
+    tf.keras.layers.Conv2D(48, kernel_size=(5,5), activation='relu', strides=1, padding='same'),
+    tf.keras.layers.Dropout(0.4),
+    tf.keras.layers.Conv2D(64, kernel_size=(5,5), activation='relu', strides=1, padding='same'),
+    tf.keras.layers.MaxPooling2D(pool_size=(2,2), strides=(2,2)),
+    tf.keras.layers.Flatten(),    
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dense(10)
+])
+
+#%%
+# Poista äskeisessä tehtävässä luodusta mallista klassifikaatiokerrokset. (eli Flatten ja kaikki sen jälkeiset kerrokset)
+model_cnn2 = tf.keras.Model(inputs = model_cnn_b.input,
+                             outputs = layer_maxpool2)
+model_cnn2.summary()
+model_cnn.summary()
+
 #%%
 #train_X = train_X.reshape((train_X.shape[0],28,28,1))
 #test_X = test_X.reshape((train_X.shape[0],28,28,1))
 print(train_X.shape)
-# Poista äskeisessä tehtävässä luodusta mallista klassifikaatiokerrokset. (eli Flatten ja kaikki sen jälkeiset kerrokset)
 
-model_cnn2 = tf.keras.Model(inputs = model_cnn.input,
-                             outputs = model_cnn.output)
+#%%
 #model_cnn2 = model_cnn
-model_cnn2 = model_cnn(input_shape=(32,32,3), include_top=False)
+#model_cnn2 = model_cnn(input_shape=(32,32,3), include_top=False)
 #model_cnn2.summary()
 
 
@@ -41,14 +88,14 @@ for layer in model_cnn2.layers:
     layer.trainable = False
 
 # Luo klassifikaatiokerrokset ja lisää ne malliin.
-flatten = tf.keras.layers.Flatten()(model_cnn2.output)
-new_dense1 = tf.keras.layers.Dense(256,activation='relu')(flatten)
+new_flatten = tf.keras.layers.Flatten()(model_cnn2.output)
+new_dense1 = tf.keras.layers.Dense(256,activation='relu')(new_flatten)
 new_output = tf.keras.layers.Dense(10,activation='softmax')(new_dense1)
 # tehdään uusi malli olio
 model_cnn3 = tf.keras.Model(inputs = model_cnn2.input,
-                            outputs = model_cnn2.output)
-                             #outputs = new_output)
-#model_cnn3.summary()
+                            outputs = new_output)
+                             
+model_cnn3.summary()
 
 
 #%%
