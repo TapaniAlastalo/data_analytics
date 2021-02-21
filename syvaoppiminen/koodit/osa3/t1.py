@@ -38,12 +38,18 @@ for line in file2:
 np2 = np.array(lines2)
 print(np2.shape)
 '''
+
 # muutetaan listat numpy - taulukoiksi
 features = np.append(np1, np2, axis=0)
 # Leimaa otsikot 0 tai 1 luokkaan (clickbait vai ei)
 labels = np.append(np.ones((np1.size)), np.zeros((np2.size)), axis=0)
 print(features[0], labels[0])
 print(features.shape, labels.shape)
+    
+# muutetaan listat numpy - taulukoiksi
+features, labels = np.array(features), np.array(labels)
+print(features[0], labels[0])
+print(features.shape,labels.shape)
 
 
 
@@ -53,13 +59,19 @@ divider = int(len(features) / 1.25)
 train_X, train_y = features[:len(features) // divider], labels[:len(features) // divider]
 test_X, test_y = features[len(features) // divider:], labels[len(features) // divider:]
 
+print("shape")
 print(train_X.shape,train_y.shape)
 print(test_X.shape,test_y.shape)
 
 # sisääntulo pitää muotoilla 3D muotoon eli (samples, time_steps, features)
 # Tässä tapauksissa ominaisuuksia on vain yksi kappale ja time_steps on 10 eli kymmenen viimeisintä arvoa.
+
 train_X = train_X.reshape(train_X.shape[0], 1, 1)
 test_X =  test_X.reshape(test_X.shape[0], 1, 1)
+
+#train_X = train_X.reshape(train_X.shape[0], train_X.shape[1], 1)
+#test_X =  test_X.reshape(test_X.shape[0], test_X.shape[1], 1)
+
 
 print(train_X.shape,train_y.shape)
 print(test_X.shape,test_y.shape)
@@ -67,35 +79,51 @@ print(test_X.shape,test_y.shape)
 #%%
 # Luo RNN - malli, joka ennustaa, onko otsikko clickbait vai ei
 import tensorflow as tf
+print("model")
 
-'''
+#features = features.reshape((1,58001,1))
+#print("shape ", (features.shape))
+
+
 # data tulee olla kolme dimensiota, eli muokataan se muotoon (1,5,1)
-input_layer = tf.keras.Input(shape=(train_X.shape[0],1))
+input_layer = tf.keras.Input(shape=(5,1))#train_X.shape[0],1))
 rnn = tf.keras.layers.SimpleRNN(1,return_sequences=True)(input_layer)
 rnn2 = tf.keras.layers.SimpleRNN(1)(rnn)
-rnn_model = tf.keras.Model(inputs=input_layer,
+model = tf.keras.Model(inputs=input_layer,
                            outputs=rnn2)
 
-'''
-rnn_model = tf.keras.Sequential([
+print(model.summary())
+
+#print(model.predict(train_X))
+
+
+''''
+model = tf.keras.Sequential([
     tf.keras.layers.LSTM(20),
     tf.keras.layers.Dense(20,activation='relu'),
     tf.keras.layers.Dense(1,activation='linear')
 ])
-
+'''
 
 #%%
 # Tulosta mallin tarkkuus evaluate - funktiolla
 # Seuraavaksi luomme neuroverkon.
 # Vertailun vuoksi luodaan ensin täysin yhdistetty neuroverkko, jossa on kaksi piiloitettua kerrosta.
+print("compile")
+#model.compile(optimizer='adam',
+#                   loss='categorical_crossentropy', #'mse'
+#                   metrics=['accuracy']) #['mean_squared_error'])
 
-rnn_model.compile(optimizer='adam',
-                   loss='categorical_crossentropy', #'mse'
-                   metrics=['accuracy']) #['mean_squared_error'])
+model.compile(optimizer='adam',
+                   loss='mse',
+                   metrics=['mean_squared_error'])
 
-rnn_model.fit(train_X, train_y, epochs=10, verbose=0)
-test_results = rnn_model.evaluate(test_X, test_y, verbose=0)
-predictions = rnn_model.predict(test_X)
+print("train")
+model.fit(train_X, train_y, epochs=3, verbose=0)
+print("evaluate")
+test_results = model.evaluate(test_X, test_y, verbose=0)
+print("predict")
+predictions = model.predict(test_X)
 print(f"Test loss {test_results[0]}")
 
 #%%

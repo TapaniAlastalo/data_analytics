@@ -27,6 +27,7 @@ import numpy as np
 data = np.arange(1,6) # [1,2,3,4,5]
 # data tulee olla kolme dimensiota, eli muokataan se muotoon (1,5,1)
 data = data.reshape((1,5,1))
+print("shape ", (data.shape))
 input_layer = tf.keras.Input(shape=(5,1))
 rnn = tf.keras.layers.SimpleRNN(1)(input_layer)
 rnn_model = tf.keras.Model(inputs=input_layer,
